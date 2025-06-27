@@ -7,7 +7,7 @@ const multer    = require('multer');
 const db        = require('./database');
 
 const app       = express();
-const PORT      = 9000;
+const PORT      = 3000;
 const SALT_ROUNDS = 10;
 
 // Configure multer for uploads
