@@ -6,6 +6,8 @@ const registerTitle = document.querySelector(".title-register");
 const signUpBtn = document.querySelector("#SignUpBtn");
 const signInBtn = document.querySelector("#SignInBtn");
 const list = document.querySelectorAll('.list');
+const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
 function activeLink() {
     list.forEach((item) =>
     item.classList.remove('active'));
@@ -38,11 +40,35 @@ function registerFunction(){
     registerTitle.style.opacity = 1;
 }
 
+function validateEmailInput() {
+  const emailInput = document.getElementById('emailInput').value;
+  const feedbackElement = document.getElementById('emailFeedback');
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+}
+
 // Registration
 signUpBtn.addEventListener("click", async () => {
     const email = document.getElementById("reg-email").value;
     const password = document.getElementById("reg-pass").value;
     const role = document.getElementById("reg-role").value;
+
+    if (!email) {
+    alert("Please enter your email.");
+    return;
+    }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    alert("Please enter a valid Email address.");
+    return;
+    }
+    if (!password) {
+        alert("Please enter your password.");
+        return;
+    }
+    if (!role) {
+        alert("Please select a role.");
+        return;
+    }
 
     const res = await fetch("http://localhost:3000/register", {
         method: "POST",
@@ -66,17 +92,32 @@ signInBtn.addEventListener("click", async (e) => {
   const email = document.getElementById("log-email").value;
   const password = document.getElementById("log-pass").value;
 
-  try {
-    const res = await fetch("http://localhost:3000/login", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email, password }),
-    });
-    const data = await res.json();
+  if (!email) {
+  alert("Please enter your email.");
+  return;
+  }
+  if (!/^[^\s@]+@gmail.com$/.test(email)) {
+  alert("Please enter a valid Gmail address.");
+  return;
+  }
+  if (!password) {
+  alert("Please enter your password.");
+  return;
+  }
 
-    if (!data.success) {
-      return alert("Login failed: " + data.error);
-    }
+  else {
+
+    try {
+      const res = await fetch("http://localhost:3000/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
+      });
+      const data = await res.json();
+
+      if (!data.success) {
+        return alert("Login failed: " + data.error);
+      }
 
     // Redirect based on role:
     switch (data.user.role) {
@@ -94,7 +135,8 @@ signInBtn.addEventListener("click", async (e) => {
     console.error("Login error:", err);
     alert("An error occurred. Check the console.");
   }
-});
+}});
+
 
 document.getElementById('courseForm')
       .addEventListener('submit', async (e) => {
@@ -119,3 +161,6 @@ document.getElementById('courseForm')
           alert('Upload failed.');
         }
       });
+
+
+

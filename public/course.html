@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Create a Course</title>
+  <link rel="stylesheet" href="css/course.css" />
+</head>
+<body>
+  <h1>Create a New Course</h1>
+
+  <form id="courseForm" enctype="multipart/form-data">
+    <div class="input-box">
+      <label for="course-title">Course Title</label>
+      <input type="text" id="course-title" name="title" required />
+    </div>
+
+    <div class="input-box">
+      <label for="course-topic">Topic</label>
+      <input type="text" id="course-topic" name="topic" required />
+    </div>
+
+    <div class="input-box">
+      <label for="course-desc">Description</label>
+      <textarea id="course-desc" name="description" rows="5" required></textarea>
+    </div>
+
+    <div class="input-box">
+      <label for="course-files">Upload Images / PDFs</label>
+      <input type="file"
+             id="course-files"
+             name="files"
+             accept="image/*,.pdf"
+             multiple />
+    </div>
+
+    <div class="input-box">
+      <button type="submit" class="btn">Publish Course</button>
+    </div>
+  </form>
+
+  <script src="js/script.js"></script>
+</body>
+</html>
