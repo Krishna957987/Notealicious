@@ -68,8 +68,8 @@ app.post('/login', (req, res) => {
   });
 });
 
-// ─── COURSE CREATION ROUTE ────────────────────────────────
-// Expects: title, topic, description in body; files[] in multipart/form-data
+// ─── COURSE CREATION ROUTE ─────
+
 app.post(
   '/courses',
   upload.array('files', 5),
@@ -126,6 +126,7 @@ app.get('/courses', (req, res) => {
             if (err) return reject(err);
 
             const filesProcessed = files.map(file => ({
+              filename: file.filename,  
               originalname: file.originalname,
               mimetype: file.mimetype,
               path: file.path
