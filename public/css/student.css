@@ -19,3 +19,31 @@ h1 {
   text-align: center;
 }
 
+.courses-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  justify-content: center;
+  margin: 40px auto;
+  max-width: 1200px;
+}
+
+.course-card {
+  background: white;
+  border-radius: 10px;
+  padding: 15px 20px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  width: 250px;
+}
+
+.course-card h3 {
+  font-size: 18px;
+  margin-bottom: 8px;
+  color: #333;
+}
+
+.course-card p {
+  font-size: 14px;
+  margin-bottom: 5px;
+}
+

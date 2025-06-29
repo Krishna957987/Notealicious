@@ -9,7 +9,7 @@ const db = new sqlite3.Database('users.db', (err) => {
     }
 });
 
-// Create table if it doesn't exist
+
 db.run(`
     CREATE TABLE IF NOT EXISTS users (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -17,6 +17,27 @@ db.run(`
         password TEXT NOT NULL,
         role TEXT NOT NULL
     )
+`);
+
+db.run(`
+  CREATE TABLE IF NOT EXISTS courses (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    title TEXT,
+    topic TEXT,
+    description TEXT
+  )
+`);
+
+db.run(`
+  CREATE TABLE IF NOT EXISTS course_files (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    course_id INTEGER,
+    filename TEXT,
+    originalname TEXT,
+    mimetype TEXT,
+    path TEXT,
+    FOREIGN KEY(course_id) REFERENCES courses(id)
+  )
 `);
 
 module.exports = db;

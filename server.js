@@ -6,6 +6,7 @@ const bcrypt    = require('bcrypt');
 const multer    = require('multer');
 const db        = require('./database');
 
+
 const app       = express();
 const PORT      = 3000;
 const SALT_ROUNDS = 10;
@@ -20,6 +21,8 @@ app.use(cors());
 app.use(bodyParser.json());
 app.use(express.static(path.join(__dirname, 'public')));
 
+
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 // ─── AUTH ROUTES ──────────────────────────────────────────
 
 // Register
@@ -81,7 +84,7 @@ app.post(
     // 1) Insert course metadata
     const courseStmt = db.prepare(
       `INSERT INTO courses (title, topic, description) VALUES (?, ?, ?)`
-    );
+    ); 
     courseStmt.run([title, topic, description], function(err) {
       if (err) {
         console.error('DB Insert Course Error:', err.message);
@@ -112,7 +115,31 @@ app.post(
   }
 );
 
+app.get('/courses', (req, res) => {
+  db.all(`SELECT * FROM courses ORDER BY id DESC`, [], async (err, courses) => {
+    if (err) return res.status(500).json({ success: false, error: err.message });
 
+    const enrichedCourses = await Promise.all(
+      courses.map(course => {
+        return new Promise((resolve, reject) => {
+          db.all(`SELECT * FROM course_files WHERE course_id = ?`, [course.id], (err, files) => {
+            if (err) return reject(err);
+
+            const filesProcessed = files.map(file => ({
+              originalname: file.originalname,
+              mimetype: file.mimetype,
+              path: file.path
+            }));
+
+            resolve({ ...course, files: filesProcessed });
+          });
+        });
+      })
+    );
+
+    res.json({ success: true, courses: enrichedCourses });
+  });
+});
 
 app.listen(PORT, () => {
   console.log(`🔐 Server running at http://localhost:${PORT}`);
