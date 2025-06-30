@@ -30,10 +30,10 @@ h1 {
 
 .course-card {
   background: white;
-  border-radius: 10px;
-  padding: 15px 20px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  width: 250px;
+  border-radius: 12px;
+  padding: 20px 25px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  width: 100%;
 }
 
 .course-card h3 {
@@ -47,3 +47,15 @@ h1 {
   margin-bottom: 5px;
 }
 
+.response-form {
+  margin-top: 15px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.response-form input,
+.response-form button {
+  padding: 8px;
+  font-size: 14px;
+}

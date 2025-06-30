@@ -3,9 +3,9 @@ const sqlite3 = require('sqlite3').verbose();
 
 const db = new sqlite3.Database('users.db', (err) => {
     if (err) {
-        console.error('❌ Failed to connect to database:', err.message);
+        console.error('Failed to connect to database:', err.message);
     } else {
-        console.log('✅ Connected to SQLite database.');
+        console.log('Connected to SQLite database.');
     }
 });
 
@@ -39,5 +39,18 @@ db.run(`
     FOREIGN KEY(course_id) REFERENCES courses(id)
   )
 `);
+console.log('creating submissions table')
+db.run(`
+  CREATE TABLE IF NOT EXISTS submissions (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    course_id INTEGER,
+    filename TEXT,
+    originalname TEXT,
+    mimetype TEXT,
+    path TEXT,
+    FOREIGN KEY(course_id) REFERENCES courses(id)
+  )
+`);
+
 
 module.exports = db;

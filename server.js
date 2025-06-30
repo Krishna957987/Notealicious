@@ -1,14 +1,14 @@
-const express   = require('express');
-const bodyParser= require('body-parser');
-const cors      = require('cors');
-const path      = require('path');
-const bcrypt    = require('bcrypt');
-const multer    = require('multer');
-const db        = require('./database');
+const express = require('express');
+const bodyParser = require('body-parser');
+const cors= require('cors');
+const path= require('path');
+const bcrypt= require('bcrypt');
+const multer= require('multer');
+const db= require('./database');
 
 
-const app       = express();
-const PORT      = 3000;
+const app= express();
+const PORT= 3000;
 const SALT_ROUNDS = 10;
 
 // Configure multer for uploads
@@ -23,7 +23,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
-// ─── AUTH ROUTES ──────────────────────────────────────────
+
 
 // Register
 app.post('/register', async (req, res) => {
@@ -49,7 +49,7 @@ app.post('/register', async (req, res) => {
   }
 });
 
-// Login
+
 app.post('/login', (req, res) => {
   const { email, password } = req.body;
   db.get('SELECT * FROM users WHERE email = ?', [email], async (err, user) => {
@@ -68,20 +68,20 @@ app.post('/login', (req, res) => {
   });
 });
 
-// ─── COURSE CREATION ROUTE ─────
+
 
 app.post(
   '/courses',
   upload.array('files', 5),
   (req, res) => {
     const { title, topic, description } = req.body;
-    const files = req.files; // array of { filename, originalname, mimetype, path, ... }
+    const files = req.files; 
 
     if (!title || !topic || !description) {
       return res.status(400).json({ error: 'Title, topic and description are required.' });
     }
 
-    // 1) Insert course metadata
+  
     const courseStmt = db.prepare(
       `INSERT INTO courses (title, topic, description) VALUES (?, ?, ?)`
     ); 
@@ -92,7 +92,7 @@ app.post(
       }
       const courseId = this.lastID;
 
-      // 2) Insert file metadata (if any)
+
       if (files && files.length) {
         const fileStmt = db.prepare(
           `INSERT INTO course_files (course_id, filename, originalname, mimetype, path)
@@ -138,10 +138,79 @@ app.get('/courses', (req, res) => {
       })
     );
 
+    app.get('/submissions', (req, res) => {
+      const query = `
+        SELECT submissions.*, courses.title AS courseTitle, courses.description, courses.topic
+        FROM submissions
+        JOIN courses ON submissions.course_id = courses.id
+        ORDER BY submissions.id DESC
+      `;
+
+      db.all(query, [], (err, rows) => {
+        if (err) {
+          console.error('Submission fetch error:', err.message);
+          return res.status(500).json({ success: false, error: 'Failed to fetch submissions' });
+        }
+        res.json({ success: true, submissions: rows });
+      });
+    });
+
     res.json({ success: true, courses: enrichedCourses });
   });
 });
 
+app.post('/submit', upload.single('response'), (req, res) => {
+  const { courseId } = req.body;
+  const file = req.file;
+
+  if (!courseId || !file) {
+    return res.status(400).json({ error: 'Missing course ID or file.' });
+  }
+
+  const stmt = db.prepare(`
+    INSERT INTO submissions (course_id, filename, originalname, mimetype, path)
+    VALUES (?, ?, ?, ?, ?)
+  `);
+
+  stmt.run(
+    [courseId, file.filename, file.originalname, file.mimetype, file.path],
+    function (err) {
+      if (err) {
+        console.error('Submission insert error:', err.message);
+        return res.status(500).json({ error: 'Could not save submission.' });
+      }
+
+      res.json({ success: true, submissionId: this.lastID });
+    }
+  );
+});
+
 app.listen(PORT, () => {
-  console.log(`🔐 Server running at http://localhost:${PORT}`);
+  console.log(` Server running at http://localhost:${PORT}`);
+});
+
+app.post('/submissions', upload.single('response'), (req, res) => {
+  const { courseId } = req.body;
+  const file = req.file;
+
+  if (!courseId || !file) {
+    return res.status(400).json({ error: 'Missing course ID or file.' });
+  }
+
+  const stmt = db.prepare(`
+    INSERT INTO submissions (course_id, filename, originalname, mimetype, path)
+    VALUES (?, ?, ?, ?, ?)
+  `);
+
+  stmt.run(
+    [courseId, file.filename, file.originalname, file.mimetype, file.path],
+    function (err) {
+      if (err) {
+        console.error('Submission insert error:', err.message);
+        return res.status(500).json({ error: 'Could not save submission.' });
+      }
+
+      res.json({ success: true, submissionId: this.lastID });
+    }
+  );
 });

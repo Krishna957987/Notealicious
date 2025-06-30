@@ -1,3 +1,4 @@
+// UI + Auth logic remains the same
 const loginForm = document.querySelector(".login-form");
 const registerForm = document.querySelector(".register-form");
 const wrapper = document.querySelector(".wrapper");
@@ -6,7 +7,6 @@ const registerTitle = document.querySelector(".title-register");
 const signUpBtn = document.querySelector("#SignUpBtn");
 const signInBtn = document.querySelector("#SignInBtn");
 const list = document.querySelectorAll('.list');
-const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 function activeLink() {
   list.forEach((item) => item.classList.remove('active'));
@@ -38,24 +38,16 @@ function registerFunction() {
   registerTitle.style.opacity = 1;
 }
 
-function validateEmailInput() {
-  const emailInput = document.getElementById('emailInput').value;
-  const feedbackElement = document.getElementById('emailFeedback');
-  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-}
-
-// Registration
+// REGISTER
 signUpBtn?.addEventListener("click", async () => {
   const email = document.getElementById("reg-email").value;
   const password = document.getElementById("reg-pass").value;
   const role = document.getElementById("reg-role").value;
 
-  if (!email) return alert("Please enter your email.");
-  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return alert("Please enter a valid Email address.");
-  if (!password) return alert("Please enter your password.");
-  if (!role) return alert("Please select a role.");
+  if (!email || !password || !role) return alert("Please fill in all fields.");
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return alert("Invalid email.");
 
-  const res = await fetch("http://localhost:3000/register", {
+  const res = await fetch("/register", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ email, password, role }),
@@ -70,19 +62,18 @@ signUpBtn?.addEventListener("click", async () => {
   }
 });
 
-// Login
+// LOGIN
 signInBtn?.addEventListener("click", async (e) => {
   e.preventDefault();
 
   const email = document.getElementById("log-email").value;
   const password = document.getElementById("log-pass").value;
 
-  if (!email) return alert("Please enter your email.");
-  if (!/^[^\s@]+@gmail.com$/.test(email)) return alert("Please enter a valid Gmail address.");
-  if (!password) return alert("Please enter your password.");
+  if (!email || !password) return alert("Missing credentials.");
+  if (!/^[^\s@]+@gmail.com$/.test(email)) return alert("Use a Gmail address.");
 
   try {
-    const res = await fetch("http://localhost:3000/login", {
+    const res = await fetch("/login", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ email, password }),
@@ -92,24 +83,18 @@ signInBtn?.addEventListener("click", async (e) => {
 
     if (!data.success) return alert("Login failed: " + data.error);
 
-    // Redirect based on role:
     switch (data.user.role) {
-      case "teacher":
-        window.location.href = "/teacher.html";
-        break;
-      case "student":
-        window.location.href = "/student.html";
-        break;
-      default:
-        alert("Unknown role: " + data.user.role);
+      case "teacher": window.location.href = "/teacher.html"; break;
+      case "student": window.location.href = "/student.html"; break;
+      default: alert("Unknown role.");
     }
   } catch (err) {
     console.error("Login error:", err);
-    alert("An error occurred. Check the console.");
+    alert("An error occurred.");
   }
 });
 
-// ✅ Course creation only if courseForm exists
+// COURSE CREATION (teacher)
 if (document.getElementById('courseForm')) {
   document.getElementById('courseForm').addEventListener('submit', async (e) => {
     e.preventDefault();
@@ -117,15 +102,11 @@ if (document.getElementById('courseForm')) {
     const data = new FormData(form);
 
     try {
-      const res = await fetch('/courses', {
-        method: 'POST',
-        body: data
-      });
+      const res = await fetch('/courses', { method: 'POST', body: data });
       const result = await res.json();
       if (result.success) {
         alert('Course created!');
-        // Redirect to student page so courses appear there
-        window.location.href = '/student.html';
+        window.location.href = '/teacher.html';
       } else {
         alert('Error: ' + result.error);
       }
@@ -136,21 +117,17 @@ if (document.getElementById('courseForm')) {
   });
 }
 
-// ✅ Load courses only if on student page
-// ✅ Load courses only if on student page
+// LOAD COURSES (student.html)
 async function loadCourses() {
   try {
     const res = await fetch('/courses');
     const data = await res.json();
 
-    if (!data.success) {
-      return alert('Could not fetch courses');
-    }
-
+    if (!data.success) return alert('Could not fetch courses');
     const container = document.getElementById('courses-container');
     if (!container) return;
 
-    container.innerHTML = ''; // clear old content
+    container.innerHTML = '';
 
     if (data.courses.length === 0) {
       container.innerHTML = "<p>No courses available yet.</p>";
@@ -161,33 +138,95 @@ async function loadCourses() {
       const card = document.createElement('div');
       card.className = 'course-card';
 
-      // Build file links if any
-      let filesHTML = '';
-      if (course.files && course.files.length > 0) {
-        filesHTML += '<div><strong>Attachments:</strong><ul>';
-        course.files.forEach(file => {
-          const filename = file.originalname || 'Attachment';
-          const fileUrl = `/uploads/${file.filename}`;
-          filesHTML += `<li><a href="${fileUrl}" target="_blank">${filename}</a></li>`;
-        });
-        filesHTML += '</ul></div>';
-      }
-
       card.innerHTML = `
         <h3>${course.title}</h3>
         <p><strong>Topic:</strong> ${course.topic}</p>
         <p>${course.description}</p>
-        ${filesHTML}
+        ${course.files.map(file => `
+          <p><a href="/uploads/${file.filename}" target="_blank">${file.originalname}</a></p>
+        `).join('')}
+        <form class="response-form" data-course-id="${course.id}" enctype="multipart/form-data">
+          <label><strong>Your answer</strong></label>
+          <input type="file" name="response" required />
+          <button type="submit">Submit Response</button>
+        </form>
+      `;
+
+      
+
+      container.appendChild(card);
+    });
+
+  } catch (err) {
+    console.error('Error loading courses:', err);
+  }
+}
+
+
+document.addEventListener('submit', async (e) => {
+  if (e.target.classList.contains('response-form')) {
+    e.preventDefault();
+    const form = e.target;
+    const courseId = form.getAttribute('data-course-id');
+    const fileInput = form.querySelector('input[type="file"]');
+    const formData = new FormData();
+    formData.append('response', fileInput.files[0]);
+    formData.append('courseId', courseId);
+
+    try {
+      const res = await fetch('/submit', {
+        method: 'POST',
+        body: formData
+      });
+
+      const data = await res.json();
+      if (data.success) {
+        alert('Submission successful!');
+        form.reset();
+      } else {
+        alert('Error: ' + data.error);
+      }
+    } catch (err) {
+      console.error('Submission error:', err);
+      alert('An error occurred.');
+    }
+  }
+});
+
+
+async function loadSubmissions() {
+  const container = document.getElementById('submissions-container');
+  if (!container) return;
+
+  try {
+    const res = await fetch('/submissions');
+    const data = await res.json();
+
+    if (!data.success || !data.submissions.length) {
+      container.innerHTML = "<p>No submissions yet.</p>";
+      return;
+    }
+
+    container.innerHTML = '';
+    data.submissions.forEach(sub => {
+      const card = document.createElement('div');
+      card.className = 'submission-card';
+
+      card.innerHTML = `
+        <h3>${sub.courseTitle}</h3>
+        <p><strong>Topic:</strong> ${sub.topic}</p>
+        <p>${sub.description}</p>
+        <p><a href="/uploads/${sub.filename}" target="_blank">${sub.originalname}</a></p>
       `;
 
       container.appendChild(card);
     });
 
   } catch (err) {
-    console.error('Failed to fetch courses:', err);
+    console.error('Error loading submissions:', err);
   }
 }
 
-if (document.getElementById('courses-container')) {
-  loadCourses();
-}
+// INIT
+if (document.getElementById('courses-container')) loadCourses();
+if (document.getElementById('submissions-container')) loadSubmissions();
