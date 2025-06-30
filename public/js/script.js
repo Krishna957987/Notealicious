@@ -70,7 +70,7 @@ signInBtn?.addEventListener("click", async (e) => {
   const password = document.getElementById("log-pass").value;
 
   if (!email || !password) return alert("Missing credentials.");
-  if (!/^[^\s@]+@gmail.com$/.test(email)) return alert("Use a Gmail address.");
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return alert("Use a Gmail address.");
 
   try {
     const res = await fetch("/login", {
