@@ -177,6 +177,9 @@ async function loadCourses(userId) {
       skipBtn.textContent = "Skip";
       skipBtn.classList.add("skip-btn");
       skipBtn.setAttribute("data-course-id", course.id);
+      skipBtn.style.fontSize="16px";
+      skipBtn.style.borderRadius="5px";
+      
       card.appendChild(skipBtn);
 
       skipBtn.addEventListener('click', async () => {

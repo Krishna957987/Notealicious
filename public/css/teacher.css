@@ -12,25 +12,17 @@ body {
   background-color: #f4f4f4;
   min-height: 100vh;
   padding-top: 60px;
+  background:#3A405A ;
 }
 
 h1 {
   margin-bottom: 20px;
   text-align: center;
+  color: #FFF5EC;
 }
 
-.search-container {
-  position: relative;
-}
-
-.search-container input {
-  width: 1000px;
-  height: 50px;
-  font-size: 18px;
-  padding: 10px 20px;
-  border-radius: 10px;
-  border: none;
-  box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.2);
+h2 {
+  color: #FFF5EC;
 }
 
 .create-course-container {
@@ -43,6 +35,7 @@ h1 {
   border: none;
   border-radius: 8px;
   cursor: pointer;
+  background: #FFD695;
 }
 
 .submissions-container {
@@ -55,8 +48,21 @@ h1 {
 }
 
 .submission-card {
-  background: #fff;
+  background: #FFD695;
   padding: 15px 20px;
   border-radius: 10px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  box-shadow: 0 2px 8px #FFF5EC;
+
+}
+
+.mark-form {
+  background:#FFD695 ;
+}
+
+
+
+button{
+  background: #FFF5EC;
+  border-radius: 6px;
+
 }
