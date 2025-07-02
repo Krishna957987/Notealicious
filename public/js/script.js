@@ -340,6 +340,7 @@ if (document.getElementById('courses-container')) {
 
 if (document.getElementById('submissions-container')) {
   const userId = localStorage.getItem("userId");
+  console.log(userId,'check teacher')
   if (userId) {
     loadSubmissions(userId);
   } else {
