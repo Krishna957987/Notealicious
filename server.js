@@ -8,6 +8,32 @@ const db= require('./database');
 
 
 const app= express();
+const loginAttempts = {};
+function isLocked(ip) {
+  const entry = loginAttempts[ip];
+  if (!entry) return false;
+
+  const now = Date.now();
+  if (entry.count >= 3 && (now - entry.lastAttempt) < 5 * 60 * 1000) {
+    return true;
+  }
+
+  // Reset after 5 minutes
+  if ((now - entry.lastAttempt) >= 5 * 60 * 1000) {
+    delete loginAttempts[ip];
+  }
+
+  return false;
+}
+function trackLoginFailure(ip) {
+  const now = Date.now();
+  if (!loginAttempts[ip]) {
+    loginAttempts[ip] = { count: 1, lastAttempt: now };
+  } else {
+    loginAttempts[ip].count += 1;
+    loginAttempts[ip].lastAttempt = now;
+  }
+}
 const PORT= 3000;
 const SALT_ROUNDS = 10;
 
@@ -50,23 +76,40 @@ app.post('/register', async (req, res) => {
 });
 
 
-app.post('/login', (req, res) => {
+app.post('/login', async (req, res) => {
   const { email, password } = req.body;
+  const ip = req.ip;
+
+  if (isLocked(ip)) {
+    return res.status(429).json({
+      success: false,
+      error: 'Too many login attempts. Try again in 5 minutes.'
+    });
+  }
+
   db.get('SELECT * FROM users WHERE email = ?', [email], async (err, user) => {
     if (err) {
       console.error('DB Query Error:', err.message);
       return res.status(500).json({ error: 'Internal server error.' });
     }
+
     if (!user) {
+      trackLoginFailure(ip);
       return res.status(401).json({ error: 'Invalid credentials.' });
     }
+
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
+      trackLoginFailure(ip);
       return res.status(401).json({ error: 'Invalid credentials.' });
     }
+
+    // Login successful – reset attempts
+    delete loginAttempts[ip];
     res.json({ success: true, user });
   });
 });
+
 
 
 
