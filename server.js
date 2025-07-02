@@ -214,3 +214,75 @@ app.post('/submissions', upload.single('response'), (req, res) => {
     }
   );
 });
+
+app.post('/submissions/:id/mark', (req, res) => {
+  const submissionId = req.params.id;
+  const { mark } = req.body;
+
+  const stmt = db.prepare('UPDATE submissions SET mark = ? WHERE id = ?');
+  stmt.run([mark, submissionId], function(err) {
+    if (err) {
+      console.error('Mark update error:', err.message);
+      return res.status(500).json({ success: false, error: 'Failed to mark submission' });
+    }
+    res.json({ success: true });
+  });
+});
+
+app.delete('/submissions/:id', (req, res) => {
+  const submissionId = req.params.id;
+
+  const stmt = db.prepare('DELETE FROM submissions WHERE id = ?');
+  stmt.run([submissionId], function(err) {
+    if (err) {
+      console.error('Delete error:', err.message);
+      return res.status(500).json({ success: false, error: 'Failed to delete submission' });
+    }
+    res.json({ success: true });
+  });
+});
+
+app.post('/skip-course', (req, res) => {
+  const { userId, courseId } = req.body;
+  if (!userId || !courseId) return res.status(400).json({ error: 'Missing userId or courseId' });
+
+  const stmt = db.prepare('INSERT OR IGNORE INTO skipped_courses (user_id, course_id) VALUES (?, ?)');
+  stmt.run([userId, courseId], function(err) {
+    if (err) {
+      console.error('Error skipping course:', err);
+      return res.status(500).json({ error: 'Could not skip course' });
+    }
+    res.json({ success: true });
+  });
+});
+
+// Modify courses fetch to exclude skipped courses for a user
+app.get('/courses/:userId', (req, res) => {
+  const userId = req.params.userId;
+  db.all(
+    `SELECT * FROM courses WHERE id NOT IN (
+       SELECT course_id FROM skipped_courses WHERE user_id = ?
+     ) ORDER BY id DESC`,
+    [userId],
+    async (err, courses) => {
+      if (err) return res.status(500).json({ success: false, error: err.message });
+
+      const enrichedCourses = await Promise.all(
+        courses.map(course => new Promise((resolve, reject) => {
+          db.all(`SELECT * FROM course_files WHERE course_id = ?`, [course.id], (err, files) => {
+            if (err) return reject(err);
+            const filesProcessed = files.map(f => ({
+              filename: f.filename,
+              originalname: f.originalname,
+              mimetype: f.mimetype,
+              path: f.path
+            }));
+            resolve({ ...course, files: filesProcessed });
+          });
+        }))
+      );
+
+      res.json({ success: true, courses: enrichedCourses });
+    }
+  );
+});

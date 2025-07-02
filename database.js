@@ -53,6 +53,18 @@ db.run(`
   )
 `);
 
+db.run(`
+  CREATE TABLE IF NOT EXISTS skipped_courses (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  user_id INTEGER NOT NULL,
+  course_id INTEGER NOT NULL,
+  UNIQUE(user_id, course_id),
+  FOREIGN KEY(user_id) REFERENCES users(id),
+  FOREIGN KEY(course_id) REFERENCES courses(id)
+);`)
+
+
+
 
 
 module.exports = db;
