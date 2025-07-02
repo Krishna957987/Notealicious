@@ -330,7 +330,8 @@ document.addEventListener('click', async (e) => {
 
 if (document.getElementById('courses-container')) {
   const userId = localStorage.getItem("userId");
-  if (userId) {
+  const userRole = localStorage.getItem("userRole");
+  if (userId && userRole == 'student') {
     loadCourses(userId);
   } else {
     alert("Not logged in");
@@ -340,8 +341,9 @@ if (document.getElementById('courses-container')) {
 
 if (document.getElementById('submissions-container')) {
   const userId = localStorage.getItem("userId");
+  const userRole = localStorage.getItem("userRole");
   console.log(userId,'check teacher')
-  if (userId) {
+  if (userId && userRole == 'teacher') {
     loadSubmissions(userId);
   } else {
     alert("Not logged in");
