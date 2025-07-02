@@ -179,6 +179,7 @@ async function loadCourses(userId) {
       skipBtn.setAttribute("data-course-id", course.id);
       skipBtn.style.fontSize="16px";
       skipBtn.style.borderRadius="5px";
+      skipBtn.style.marginTop="2px"
       
       card.appendChild(skipBtn);
 
@@ -330,6 +331,17 @@ document.addEventListener('click', async (e) => {
     }
   }
 });
+
+function logout() {
+  localStorage.removeItem("userId");
+  localStorage.removeItem("userRole");
+  window.location.href = "/index.html";
+}
+
+// At the end of script.js:
+document.getElementById("logoutBtn")?.addEventListener("click", logout);
+
+
 
 if (document.getElementById('courses-container')) {
   const userId = localStorage.getItem("userId");
