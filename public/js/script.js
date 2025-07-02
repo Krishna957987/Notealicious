@@ -38,14 +38,26 @@ function registerFunction() {
   registerTitle.style.opacity = 1;
 }
 
-// REGISTER
-signUpBtn?.addEventListener("click", async () => {
+//register//
+  signUpBtn?.addEventListener("click", async () => {
   const email = document.getElementById("reg-email").value;
   const password = document.getElementById("reg-pass").value;
   const role = document.getElementById("reg-role").value;
 
-  if (!email || !password || !role) return alert("Please fill in all fields.");
-  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return alert("Invalid email.");
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[A-Za-z\d@$!%*?&]{8,20}$/;
+
+  if (!email || !password || !role) {
+    return alert("Please fill in all fields.");
+  }
+
+  if (!emailRegex.test(email)) {
+    return alert("Invalid email format.");
+  }
+
+  if (!passwordRegex.test(password)) {
+    return alert("Password must be 8–20 characters long, include at least 1 uppercase letter, 1 lowercase letter, and 1 number.");
+  }
 
   const res = await fetch("/register", {
     method: "POST",

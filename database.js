@@ -48,9 +48,11 @@ db.run(`
     originalname TEXT,
     mimetype TEXT,
     path TEXT,
+    mark TEXT DEFAULT NULL,
     FOREIGN KEY(course_id) REFERENCES courses(id)
   )
 `);
+
 
 
 module.exports = db;

@@ -36,8 +36,40 @@ body{
     justify-content: center;
     align-items: center;
     height: 100vh;
-    background-color: var(--background-color);
+    background-color: #3A405A;
 }
+
+.logo-header {
+  display: flex;
+  align-items: center;
+  padding: 10px;
+}
+
+.logo-header img {
+  height: 1000px;
+  margin-left: 10px;
+  margin-bottom: 110px;
+}
+.logo-header h1{
+    color: #FFF5EC;;
+    margin-right: 500px;
+}
+
+.header-bar {
+  display: flex;
+  align-items: center;
+  gap: 20px; 
+  padding: 10px 20px;
+}
+
+.divider {
+  height: 60px;
+  width: 2px;
+  background-color: #3A405A;
+  
+}
+
+
 
 /* WRAPPER */
 .wrapper{
@@ -47,8 +79,8 @@ body{
     background-color: var(--white-color);
     border-radius: 15px;
     padding: 120px 32px 64px;
-    border: 1px solid var(--primary-color);
-    box-shadow: 0 8px 15px var(--shadow-color);
+    border: 1px solid #FFD695;
+    box-shadow: 0 8px 15px #FFD695;
     transition: var(--transition-3s);
     overflow: hidden;
 }
@@ -63,7 +95,7 @@ body{
     justify-content: center;
     width: 140px;
     height: 70px;
-    background-color: var(--primary-color);
+    background-color: #FFD695;
     border-radius: 0 0 20px 20px;
 }
 .form-header::before, .form-header::after{
