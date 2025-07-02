@@ -97,7 +97,7 @@ signInBtn?.addEventListener("click", async (e) => {
 
     // Store user data in localStorage
     localStorage.setItem("userId", data.user.id);
-    localStorage.setItem("role", data.user.role);
+    localStorage.setItem("userRole", data.user.role);
 
     switch (data.user.role) {
       case "teacher":
@@ -328,14 +328,4 @@ document.addEventListener('click', async (e) => {
   }
 });
 
-// INIT
-if (document.getElementById('courses-container')) {
-  const userId = localStorage.getItem("userId");
-  if (userId) {
-    loadCourses(userId);
-  } else {
-    alert("Not logged in");
-    window.location.href = "/index.html"; 
-  }
-}
-if (document.getElementById('submissions-container')) loadSubmissions();
+
