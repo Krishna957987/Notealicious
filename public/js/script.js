@@ -328,4 +328,23 @@ document.addEventListener('click', async (e) => {
   }
 });
 
+if (document.getElementById('courses-container')) {
+  const userId = localStorage.getItem("userId");
+  if (userId) {
+    loadCourses(userId);
+  } else {
+    alert("Not logged in");
+    window.location.href = "/index.html"; 
+  }
+}
+
+if (document.getElementById('submissions-container')) {
+  const userId = localStorage.getItem("userId");
+  if (userId) {
+    loadSubmissions(userId);
+  } else {
+    alert("Not logged in");
+    window.location.href = "/index.html"; 
+  }
+}
 

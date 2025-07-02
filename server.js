@@ -138,7 +138,13 @@ app.get('/courses', (req, res) => {
       })
     );
 
-    app.get('/submissions', (req, res) => {
+  
+
+    res.json({ success: true, courses: enrichedCourses });
+  });
+});
+
+ app.get('/submissions', (req, res) => {
       const query = `
         SELECT submissions.*, courses.title AS courseTitle, courses.description, courses.topic
         FROM submissions
@@ -154,10 +160,6 @@ app.get('/courses', (req, res) => {
         res.json({ success: true, submissions: rows });
       });
     });
-
-    res.json({ success: true, courses: enrichedCourses });
-  });
-});
 
 app.post('/submit', upload.single('response'), (req, res) => {
   const { courseId } = req.body;
